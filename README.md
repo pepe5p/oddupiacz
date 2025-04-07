@@ -1,6 +1,6 @@
 # Oddupiacz
 
-Oddupiacz is a global pre-commit hook to check for forbidden word "dupa" in file names and contents
+Oddupiacz is a global pre-commit hook to check for forbidden word "dupa" in file names and contents.
 
 ## Usage
 
@@ -21,3 +21,5 @@ git config --global core.hooksPath ~/.githooks
 ```bash
 cp oddupiacz ~/.githooks/pre-commit
 ```
+
+> **Note:** To contribute to oddupiacz with already installed oddupiacz you must commit with `--no-verify` flag
