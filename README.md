@@ -16,10 +16,10 @@ mkdir ~/.githooks
 git config --global core.hooksPath ~/.githooks
 ```
 
-3. Copy the `oddupiacz` script to `~/.githooks/pre-commit`. Make sure not to overwrite any existing pre-commit hook.
+3. Copy the `oddupiacz.sh` script to `~/.githooks/pre-commit`. Make sure not to overwrite any existing pre-commit hook.
 
 ```bash
-cp oddupiacz ~/.githooks/pre-commit
+cp oddupiacz.sh ~/.githooks/pre-commit
 ```
 
 > **Note:** To contribute to oddupiacz with already installed oddupiacz you must commit with `--no-verify` flag
