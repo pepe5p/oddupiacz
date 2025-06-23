@@ -1,19 +1,21 @@
 install: _ensure_git_hooks
-    cp oddupiacz.sh ~/.githooks/pre-commit
-    chmod +x ~/.githooks/pre-commit
+    cp oddupiacz.sh $HOME/.githooks/pre-commit
+    chmod +x $HOME/.githooks/pre-commit
 
 edit_config:
     #!/bin/sh
     echo "Enter forbidden words (space-separated):"
     read words
-    echo "$words" > ~/.githooks/oddupiacz.conf
-    echo "Forbidden words saved to ~/.githooks/oddupiacz.conf"
+    echo "$words" > $HOME/.githooks/oddupiacz.conf
+    echo "Forbidden words saved to $HOME/.githooks/oddupiacz.conf"
 
 uninstall:
-    rm ~/.githooks/pre-commit
-    rm ~/.githooks/oddupiacz.conf
+    rm $HOME/.githooks/pre-commit
+    rm $HOME/.githooks/oddupiacz.conf
 
 _ensure_git_hooks:
-    mkdir -pv ~/.githooks
-    git config --global core.hooksPath ~/.githooks
+    mkdir -pv $HOME/.githooks
+    git config --global core.hooksPath $HOME/.githooks
 
+_test:
+    ./tests/test_oddupiacz.sh
