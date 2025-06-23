@@ -1,25 +1,34 @@
 # Oddupiacz
 
-Oddupiacz is a global pre-commit hook to check for forbidden word "dupa" in file names and contents.
+A global pre-commit hook to check for forbidden words in git changes.
 
-## Usage
+## Prerequisites
 
-1. Create `~/.githooks/` catalog if you haven't already.
-
-```bash
-mkdir ~/.githooks
-```
-
-2. Add `~/.githooks` to your git configuration. This will set the global hooks path to `~/.githooks`.
+This project uses [just](https://github.com/casey/just) as a command runner. You'll need to install it first. If you don't want to install `just`, you can manually run commands from `justfile` instead.
 
 ```bash
-git config --global core.hooksPath ~/.githooks
+cat justfile
 ```
 
-3. Copy the `oddupiacz.sh` script to `~/.githooks/pre-commit`. Make sure not to overwrite any existing pre-commit hook.
+## Installation
 
 ```bash
-cp oddupiacz.sh ~/.githooks/pre-commit
+# Install the hook
+just install
+
+# Configure forbidden words
+just edit_config
 ```
 
-> **Note:** To contribute to oddupiacz with already installed oddupiacz you must commit with `--no-verify` flag
+This will:
+1. Create `~/.githooks/` directory and set it as your global hooks path
+2. Install the pre-commit hook
+3. Prompt you to enter forbidden words (space-separated)
+
+## Uninstallation
+
+```bash
+just uninstall
+```
+
+This will remove the pre-commit hook and configuration file.

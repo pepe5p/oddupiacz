@@ -1,24 +1,33 @@
 #!/bin/sh
-# Global pre-commit hook to check for forbidden word "dupa" in git diff (staged changes)
 
-echo "Oddupianie..."
+CONFIG_FILE="$HOME/.githooks/oddupiacz.conf"
+if [ -f "$CONFIG_FILE" ]; then
+    FORBIDDEN_WORDS=$(cat "$CONFIG_FILE")
+else
+    FORBIDDEN_WORDS="dupa"
+fi
 
-filename_matches=$(git diff --cached --name-only | grep "dupa")
-content_matches=$(git diff --cached | grep -n "dupa")
+GREP_PATTERN=$(echo "$FORBIDDEN_WORDS" | sed 's/ /|/g')
+
+filename_matches=$(git diff --cached --name-status | grep -i -E "$GREP_PATTERN")
+content_matches=$(git diff --cached | grep -i -E "$GREP_PATTERN")
 
 if [ -n "$filename_matches" ] || [ -n "$content_matches" ]; then
-    echo "Error: dupa found in staged changes."
     if [ -n "$filename_matches" ]; then
-        echo "In file names:"
-        echo "$filename_matches"
+        echo "Found forbidden words in file names:"
+        echo ""
+        echo "$filename_matches" | sed 's/^/    /'
+        echo ""
     fi
     if [ -n "$content_matches" ]; then
-        echo "In staged diff content:"
-        echo "$content_matches"
+        echo "Found forbidden words in staged diff content:"
+        echo ""
+        echo "$content_matches" | sed 's/^/    /'
+        echo ""
     fi
+    echo "Aborting commit due to \`oddupiacz\`."
     exit 1
 fi
 
-echo "Oddupianie finished"
-
+echo "\`oddupiacz\` finished successfully."
 exit 0
