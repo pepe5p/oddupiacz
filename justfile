@@ -13,6 +13,9 @@ uninstall:
     rm $HOME/.githooks/pre-commit
     rm $HOME/.githooks/oddupiacz.conf
 
+watch:
+	watchexec -w oddupiacz.sh just install
+
 _ensure_git_hooks:
     mkdir -pv $HOME/.githooks
     git config --global core.hooksPath $HOME/.githooks
