@@ -146,12 +146,40 @@ test_successful_commit() {
   teardown
 }
 
+test_posix_compliance() {
+  setup
+
+  if ! command -v dash >/dev/null 2>&1; then
+    echo "⚠️ POSIX compliance test skipped: dash shell not found"
+    teardown
+    return 0
+  fi
+
+  if ! dash -n "$TEST_DIR/oddupiacz.sh"; then
+    echo "❌ POSIX compliance test failed: script contains syntax errors in dash"
+    teardown
+    return 1
+  fi
+
+  echo "badword" > "$TEST_HOOKS_DIR/oddupiacz.conf"
+
+  if ! HOME="$TEST_DIR" dash "$TEST_DIR/oddupiacz.sh" >/dev/null 2>&1; then
+    echo "❌ POSIX compliance test failed: script execution failed in dash"
+    teardown
+    return 1
+  fi
+
+  echo "✅ POSIX compliance test passed"
+  teardown
+}
+
 run_tests() {
   test_install
   test_edit_config
   test_forbidden_words_in_diff
   test_forbidden_word_in_file_names
   test_successful_commit
+  test_posix_compliance
 
   echo "✅ All tests completed"
 }
