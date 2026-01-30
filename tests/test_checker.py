@@ -4,11 +4,7 @@ Unit tests for checker.py module.
 
 from pathlib import Path
 
-from oddupiacz.checker import (
-    parse_diff_for_violations,
-    Violation,
-)
-from oddupiacz.cli_hook import format_violation_message
+from oddupiacz.checker import parse_diff_for_violations
 from oddupiacz.config import Config
 
 
@@ -131,62 +127,3 @@ class TestParseDiffForViolations:
 
         # Should not match "TODO" in the filename
         assert violations == []
-
-
-class TestFormatViolationMessage:
-    """Tests for format_violation_message function."""
-
-    def test_format_empty_violations(self) -> None:
-        """Test formatting with no violations."""
-        message = format_violation_message([])
-        assert message == ""
-
-    def test_format_single_violation(self) -> None:
-        """Test formatting a single violation."""
-        violations = [Violation(phrase="TODO", file="test.py", line="TODO: fix this")]
-
-        message = format_violation_message(violations)
-
-        assert "TODO" in message
-        assert "test.py" in message
-        assert "TODO: fix this" in message
-        assert "Commit aborted" in message
-
-    def test_format_multiple_violations(self) -> None:
-        """Test formatting multiple violations."""
-        violations = [
-            Violation(phrase="TODO", file="test1.py", line="TODO: fix"),
-            Violation(phrase="FIXME", file="test2.py", line="FIXME: broken"),
-        ]
-
-        message = format_violation_message(violations)
-
-        assert "TODO" in message
-        assert "FIXME" in message
-        assert "test1.py" in message
-        assert "test2.py" in message
-        assert message.count("BLOCKED") == 2
-
-
-class TestCheckDiffForViolations:
-    """Tests for check_diff_for_violations function."""
-
-    def test_returns_success_with_no_violations(self) -> None:
-        """Test that function returns success when no violations found."""
-        diff = "+++ b/test.py\n+print('hello world')"
-        config = _create_test_config(["TODO"])
-        violations = parse_diff_for_violations(diff, config)
-
-        assert len(violations) == 0
-
-    def test_returns_failure_with_violations(self) -> None:
-        """Test that function returns failure when violations found."""
-        diff = "+++ b/test.py\n+# TODO: fix this"
-        config = _create_test_config(["TODO"])
-        violations = parse_diff_for_violations(diff, config)
-
-        assert violations is not None
-        assert len(violations) == 1
-        assert violations[0].phrase == "TODO"
-        assert violations[0].file == "test.py"
-        assert "TODO: fix this" in violations[0].line

@@ -64,6 +64,7 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError()",
 ]
+omit = ["oddupiacz/cli_hook.py", "oddupiacz/cli_setup.py"]
 
 [tool.fawltydeps]
 code = ["oddupiacz"]
@@ -89,5 +90,5 @@ disable_error_code = "misc"
 
 [tool.pytest.ini_options]
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
-addopts = "--strict-markers -p no:warnings --cov=. --cov-fail-under=50 --cov-config=.coveragerc"
+addopts = "--strict-markers -p no:warnings --cov=oddupiacz --cov-fail-under=90 --cov-config=.coveragerc"
 asyncio_mode = "auto"

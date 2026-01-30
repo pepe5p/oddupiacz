@@ -3,18 +3,9 @@ Core logic for parsing git diffs and detecting violations.
 """
 
 import re
-from dataclasses import dataclass
 
 from .config import Config
-
-
-@dataclass
-class Violation:
-    """Represents a single forbidden phrase violation."""
-
-    phrase: str
-    file: str
-    line: str
+from .models import Violation
 
 
 def parse_diff_for_violations(diff_content: str, config: Config) -> list[Violation]:

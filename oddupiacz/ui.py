@@ -1,93 +1,18 @@
 """
-Interactive configuration management for installation.
+Interactive UI utilities for configuration and installation.
 """
 
 import sys
-from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
 
 import typer
-import yaml
 
 from .config import CannotLoadConfigError, Config, create_default_config, create_default_hooks_dir_path, load_config
-
-
-@dataclass
-class InstallationSettings:
-    """Settings for Oddupiacz installation."""
-
-    HOOK_FILE_NAME: ClassVar[str] = "cli_hook"
-
-    hooks_dir: Path
-    oddupiacz_path: Path
-    config_path: Path
-    python_exec: str
-
-    def create_exec_command(self) -> str:
-        """Generate the command to run Oddupiacz with the current settings."""
-        return f'"{self.python_exec}" -m oddupiacz.{self.HOOK_FILE_NAME} --config "{self.config_path}" "$@"'
-
-
-def create_hook_path(hooks_dir: Path) -> Path:
-    """Get the full path to the pre-commit hook file."""
-    return hooks_dir / "pre-commit"
-
+from .config_io import save_config, USER_CONFIG
+from .models import InstallationSettings
 
 CONFIGS_DIR = Path(__file__).parent.parent / "configs"
 EXAMPLE_CONFIG = CONFIGS_DIR / "example.yaml"
-USER_CONFIG = CONFIGS_DIR / "user_config.yaml"
-
-
-def get_config_path_interactive() -> tuple[Config, Path]:
-    """
-    Interactively prompt user for config path.
-
-    Returns:
-        Config object and path to the config file
-    """
-    typer.echo()
-    typer.secho("📝 Configuration Setup", fg=typer.colors.CYAN, bold=True)
-    typer.echo()
-
-    choices = {
-        "1": "Use default configuration (dupa)",
-        "2": "Provide path to existing config file",
-        "3": "Create config interactively",
-    }
-
-    for key, description in choices.items():
-        typer.echo(f"  {key}. {description}")
-
-    typer.echo()
-    choice = typer.prompt("Choose an option", type=str, default="1")
-
-    if choice == "1":
-        typer.secho("✓ Using default config", fg=typer.colors.GREEN)
-        config = create_default_config()
-        config_path = USER_CONFIG.expanduser().resolve()
-        save_config(config=config, config_path=config_path)
-        return config, config_path
-
-    elif choice == "2":
-        config_path_str = typer.prompt("Enter path to config file")
-        config_path = Path(config_path_str).expanduser().resolve()
-
-        try:
-            config = load_config(config_path=config_path)
-        except CannotLoadConfigError:
-            typer.secho(f"Error: Cannot load config from {config_path}", fg=typer.colors.RED, err=True)
-            raise typer.Exit(1)
-
-        typer.secho(f"✓ Using config: {config_path}", fg=typer.colors.GREEN)
-        return config, config_path
-
-    elif choice == "3":
-        return create_config_interactive()
-
-    else:
-        typer.secho("Error: Invalid choice", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
 
 
 def _collect_items(section_name: str, examples: str | None = None) -> list[str]:
@@ -193,10 +118,55 @@ def create_config_interactive() -> tuple[Config, Path]:
     return config, USER_CONFIG.expanduser().resolve()
 
 
-def save_config(config: Config, config_path: Path) -> None:
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(config_path, "w") as f:
-        yaml.dump(config.to_dict(), f, default_flow_style=False, sort_keys=False)
+def get_config_path_interactive() -> tuple[Config, Path]:
+    """
+    Interactively prompt user for config path.
+
+    Returns:
+        Config object and path to the config file
+    """
+    typer.echo()
+    typer.secho("📝 Configuration Setup", fg=typer.colors.CYAN, bold=True)
+    typer.echo()
+
+    choices = {
+        "1": "Use default configuration (dupa)",
+        "2": "Provide path to existing config file",
+        "3": "Create config interactively",
+    }
+
+    for key, description in choices.items():
+        typer.echo(f"  {key}. {description}")
+
+    typer.echo()
+    choice = typer.prompt("Choose an option", type=str, default="1")
+
+    if choice == "1":
+        typer.secho("✓ Using default config", fg=typer.colors.GREEN)
+        config = create_default_config()
+        config_path = USER_CONFIG.expanduser().resolve()
+        save_config(config=config, config_path=config_path)
+        return config, config_path
+
+    elif choice == "2":
+        config_path_str = typer.prompt("Enter path to config file")
+        config_path = Path(config_path_str).expanduser().resolve()
+
+        try:
+            config = load_config(config_path=config_path)
+        except CannotLoadConfigError:
+            typer.secho(f"Error: Cannot load config from {config_path}", fg=typer.colors.RED, err=True)
+            raise typer.Exit(1)
+
+        typer.secho(f"✓ Using config: {config_path}", fg=typer.colors.GREEN)
+        return config, config_path
+
+    elif choice == "3":
+        return create_config_interactive()
+
+    else:
+        typer.secho("Error: Invalid choice", fg=typer.colors.RED, err=True)
+        raise typer.Exit(1)
 
 
 def prompt_installation_settings() -> InstallationSettings:
@@ -250,6 +220,12 @@ def prompt_installation_settings() -> InstallationSettings:
 
 
 def prompt_config_path() -> Path:
+    """
+    Prompt user for config path.
+
+    Returns:
+        Path to the config file
+    """
     default_user_config_path = USER_CONFIG.expanduser().resolve()
     typer.echo()
     typer.secho("📝 Configuration File Selection", fg=typer.colors.CYAN, bold=True)

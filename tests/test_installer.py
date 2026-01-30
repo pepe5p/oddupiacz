@@ -4,13 +4,13 @@ Unit tests for installer.py module.
 
 from pathlib import Path
 
-from oddupiacz.config_manager import InstallationSettings
 from oddupiacz.installer import (
     create_hook_directory,
     generate_shim_content,
     remove_hook_file,
     write_executable_hook,
 )
+from oddupiacz.models import InstallationSettings
 
 
 class TestGenerateShimContent:

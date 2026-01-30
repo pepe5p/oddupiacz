@@ -9,8 +9,9 @@ from typing import Annotated
 
 import typer
 
-from .checker import parse_diff_for_violations, Violation
+from .checker import parse_diff_for_violations
 from .config import CannotLoadConfigError, load_config
+from .formatters import format_violation_message
 from .git_utils import find_local_hook_path, get_git_diff, get_repo_name, run_local_hook_if_exists
 
 app = typer.Typer(add_completion=False)
@@ -78,29 +79,6 @@ def main(
         sys.exit(1)
 
     sys.exit(0)
-
-
-def format_violation_message(violations: list[Violation]) -> str:
-    """
-    Format violation messages for display.
-
-    Args:
-        violations: List of Violation objects
-
-    Returns:
-        Formatted error message string (plain text, styling applied at display time)
-    """
-    lines = []
-    for violation in violations:
-        lines.append(f"[BLOCKED] Forbidden phrase found: '{violation.phrase}'")
-        lines.append(f"  File: {violation.file}")
-        lines.append(f"  Line: {violation.line}")
-        lines.append("-" * 40)
-
-    if violations:
-        lines.append("Commit aborted.")
-
-    return "\n".join(lines)
 
 
 if __name__ == "__main__":

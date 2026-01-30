@@ -8,8 +8,9 @@ import subprocess
 import typer
 
 from .config import load_config
-from .config_manager import create_hook_path, prompt_config_path, prompt_installation_settings
+from .config_io import create_hook_path
 from .installer import install_hook, uninstall_hook
+from .ui import prompt_config_path, prompt_installation_settings
 
 app = typer.Typer(help="Setup Oddupiacz global git hooks")
 

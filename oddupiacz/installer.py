@@ -3,26 +3,11 @@ Hook installation and management utilities.
 """
 
 import stat
-from dataclasses import dataclass
 from pathlib import Path
 
-from .config_manager import create_hook_path, InstallationSettings
+from .config_io import create_hook_path
 from .git_utils import configure_git_hooks_path, unset_git_hooks_path
-
-
-@dataclass
-class InstallationResult(InstallationSettings):
-    """Result of hook installation, extends InstallationSettings with additional info."""
-
-    dir_created: bool
-
-
-@dataclass
-class UninstallationResult:
-    """Result of hook uninstallation."""
-
-    hook_removed: bool
-    config_unset: bool
+from .models import InstallationResult, InstallationSettings, UninstallationResult
 
 
 def generate_shim_content(settings: InstallationSettings) -> str:
