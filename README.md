@@ -17,60 +17,14 @@ A global pre-commit hook to check for forbidden words in git changes.
 
 - Python 3.13+
 - Git
-- [uv](https://docs.astral.sh/uv/) (recommended) or pip
 
-### Quick Install with uv (Recommended)
-
-[uv](https://docs.astral.sh/uv/) is a fast Python package manager. If you don't have it installed:
-
-```bash
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Clone the repository
-git clone https://github.com/yourusername/oddupiacz.git
-cd oddupiacz
-
-# Sync dependencies (uv will automatically create a virtual environment)
-uv sync
-
-# Install the global pre-commit hook
-./install
-```
-
-### Alternative: Install with pip
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/oddupiacz.git
-cd oddupiacz
-
-# Create and activate virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install pyyaml typer
-
-# Install the global pre-commit hook
-python -m oddupiacz.cli_setup install
-```
-
+I recommend using [uv](https://docs.astral.sh/uv/) to set up a virtual environment, but you can safely use any other tool of your choice.
+The only real requirement is that you must pass Python interpreter path to the `./install` script.
+It will be called every time you commit.
 
 ## Configuration
 
-Create a `config.yaml` file with your forbidden phrases:
-
-```yaml
-forbidden_phrases:
-  - "temp_fix"
-  - "TODO"
-  - "FIXME"
-  - "console.log"
-  - "debugger"
-```
-
-See `configs/sample_config.yaml` for an example.
+Run `./install`. Interactive prompts will guide you through setting up your configuration.
 
 ## Usage
 
@@ -83,18 +37,6 @@ $ git commit -m "Add feature"
   Line: console.log("debug");
 ----------------------------------------
 Commit aborted.
-```
-
-### Manual Checking
-
-You can also manually check changes:
-
-```bash
-# Check staged changes
-git diff --cached --unified=0 --no-color | python -m oddupiacz.cli_hook
-
-# Use a custom config
-git diff --cached --unified=0 --no-color | python -m oddupiacz.cli_hook --config myconfig.yaml
 ```
 
 ## How It Works
@@ -143,40 +85,9 @@ This will:
 
 ## Development
 
-### Project Structure
-
-The codebase is organized into modular, testable components:
-
-```
-oddupiacz/
-├── __init__.py          # Package exports
-├── checker.py           # Core diff parsing and violation detection logic
-├── config.py            # Configuration file loading and management
-├── git_utils.py         # Git command utilities
-├── installer.py         # Hook installation/uninstallation logic
-├── cli_hook.py          # CLI for pre-commit hook (runs on each commit)
-├── cli_setup.py         # CLI for installation/uninstallation
-└── shim.py              # Shim template
-
-tests/
-├── test_checker.py      # Tests for checker.py
-├── test_config.py       # Tests for config.py
-└── test_installer.py    # Tests for installer.py
-```
-
-**Design Principles:**
-- **Pure functions**: Core logic separated from I/O for testability
-- **Modular structure**: Each file has a single responsibility
-- **CLI separation**: Typer CLIs are thin wrappers around pure functions
-- **Test coverage**: Each module has corresponding tests (except git_utils which requires integration testing)
-
 ### Setup Development Environment
 
 ```bash
-# Install uv if you haven't already
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Clone and sync dependencies
 git clone https://github.com/yourusername/oddupiacz.git
 cd oddupiacz
 uv sync
@@ -185,31 +96,19 @@ uv sync
 ### Running Tests
 
 ```bash
-# With uv (recommended)
-uv run pytest tests/
-
-# Or activate the virtual environment
-source .venv/bin/activate
-pytest tests/
+just test
 ```
 
 ### Code Style
 
-The project uses Ruff for linting and formatting:
+The project uses Ruff for linting and formatting, all linters can be run with `just`:
 
 ```bash
-# With uv
-uv run ruff check .
-uv run ruff format .
-
-# Or in activated venv
-ruff check .
-ruff format .
+just lint_full
+just lint_full_ff  # (fast-fail mode)
+just all  # (lint + tests)
+just all_ff  # (lint + tests in fast-fail mode)
 ```
-
-## License
-
-[Add your license here]
 
 ## Contributing
 
