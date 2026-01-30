@@ -1,0 +1,49 @@
+# Oddupiacz Configuration Pattern
+# This file shows all possible configuration options with explanations
+
+# REQUIRED: List of forbidden phrases to check for in commits
+# These phrases will be searched for (case-insensitive) in added lines
+# If found, the commit will be blocked
+forbidden_phrases:
+  - "TODO"           # Prevents TODO comments from being committed
+  - "FIXME"          # Prevents FIXME comments from being committed
+  - "XXX"            # Prevents XXX markers from being committed
+  - "HACK"           # Prevents HACK comments from being committed
+  - "temp_fix"       # Prevents temporary fix markers
+  - "console.log"    # Prevents JavaScript debug statements
+  - "debugger"       # Prevents JavaScript debugger statements
+  - "print("         # Prevents Python print statements (use logging instead)
+
+# OPTIONAL: Paths to exclude from checking
+# Useful for vendored code, dependencies, etc.
+exclude_paths:
+  - "vendor/"
+  - "node_modules/"
+  - ".venv/"
+  - "dist/"
+  - "build/"
+
+# OPTIONAL: Specific files to exclude from checking
+# Useful for generated files, lockfiles, etc.
+exclude_files:
+  - "package-lock.json"
+  - "yarn.lock"
+  - "poetry.lock"
+  - "Pipfile.lock"
+
+# OPTIONAL: File extensions to exclude from checking
+# Useful for binary files, minified files, etc.
+exclude_extensions:
+  - ".min.js"
+  - ".min.css"
+  - ".map"
+  - ".log"
+  - ".pyc"
+
+# OPTIONAL: Repository names to exclude from checking
+# Oddupiacz will not run in these repositories (matches repo directory name)
+# By default, oddupiacz itself is excluded
+exclude_repos:
+  - "oddupiacz"
+  - "my-personal-notes"
+

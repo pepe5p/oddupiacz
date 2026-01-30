@@ -1,0 +1,93 @@
+[project]
+name = "oddupiacz"
+version = "0.0.0"  # This is a placeholder, version is determined by git tag during CI/CD
+description = "A global pre-commit hook to check for forbidden words in git changes."
+authors = [{ name = "Piotr Karaś", email = "pepe500p@gmail.com" }]
+requires-python = ">=3.13"
+readme = "README.md"
+dependencies = [
+    "pyyaml>=6.0.3",
+    "typer>=0.21.1",
+]
+
+[dependency-groups]
+dev = [
+    "copier>=9.8.0",
+    "fawltydeps>=0.20.0,<1.0.0",
+    "ipython>=8.14.0,<9",
+    "mypy>=1.10.0,<2",
+    "pytest-asyncio>=0.25.2,<0.26",
+    "pytest-cov>=6.0.0,<7",
+    "pytest-mock>=3.14.0,<4",
+    "pytest>=8.3.4,<9",
+    "ruff>=0.14.1",
+    "types-pyyaml>=6.0.12.20250915",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+#  See https://docs.astral.sh/ruff/rules/ for more information.
+select = [
+    "PT",   # flake8-pytest-style
+    "B",    # flake8-bugbear
+    "S",    # flake8-bandit
+    "A",    # flake8-builtins
+    "COM",  # flake8-commas
+    "C4",   # flake8-comprehensions
+    "T10",  # flake8-debugger
+    "I",    # isort
+    "T20",  # flake8-print
+    "SIM",  # flake8-simplify
+    "LOG",  # flake8-logging
+    "G",    # flake8-logging-format
+    "N",    # pep8-naming
+    "E",    # pycodestyle
+    "W",    # pycodestyle
+    "F",    # pyflakes
+    ]
+ignore = ["S101", "A003", "B904", "N818", "COM812"]
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = true
+mark-parentheses = true
+
+[tool.ruff.lint.isort]
+order-by-type = false
+
+[tool.coverage.report]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError()",
+]
+
+[tool.fawltydeps]
+code = ["oddupiacz"]
+deps = ["pyproject.toml"]
+ignore_unused = [
+    # Dev dependencies. This list should contain ALL of them!
+    "copier",
+    "fawltydeps",
+    "ipython",
+    "mypy",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest",
+    "ruff",
+]
+
+[tool.mypy]
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = false
+disable_error_code = "misc"
+
+[tool.pytest.ini_options]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "--strict-markers -p no:warnings --cov=. --cov-fail-under=50 --cov-config=.coveragerc"
+asyncio_mode = "auto"
