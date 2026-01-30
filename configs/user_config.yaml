@@ -1,0 +1,8 @@
+hooks_dir: /Users/piotrkaras/.githooks_global
+forbidden_phrases:
+- dupa
+exclude_paths: []
+exclude_files: []
+exclude_extensions: []
+exclude_repos:
+- oddupiacz
