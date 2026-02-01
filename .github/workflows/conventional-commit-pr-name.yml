@@ -1,4 +1,4 @@
-name: "Check PR title matches conventional commit specification"
+name: "🧪 CI - Check PR title matches conventional commit specification"
 
 on:
   pull_request:

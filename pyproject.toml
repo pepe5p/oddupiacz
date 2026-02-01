@@ -1,6 +1,6 @@
 [project]
 name = "oddupiacz"
-version = "0.0.0"  # This is a placeholder, version is determined by git tag during CI/CD
+version = "0.0.0"  # This is a placeholder, version is determined by git tag and commits
 description = "A global pre-commit hook to check for forbidden words in git changes."
 authors = [{ name = "Piotr Karaś", email = "pepe500p@gmail.com" }]
 requires-python = ">=3.13"
@@ -12,15 +12,15 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "copier>=9.8.0",
+    "copier>=9.11.3,<10",
     "fawltydeps>=0.20.0,<1.0.0",
-    "ipython>=8.14.0,<9",
-    "mypy>=1.10.0,<2",
-    "pytest-asyncio>=0.25.2,<0.26",
-    "pytest-cov>=6.0.0,<7",
-    "pytest-mock>=3.14.0,<4",
-    "pytest>=8.3.4,<9",
-    "ruff>=0.14.1",
+    "ipython>=9.9.0,<10",
+    "mypy>=1.19.1,<2",
+    "pytest-cov>=7.0.0,<8",
+    "pytest-mock>=3.15.1,<4",
+    "pytest>=9.0.2,<10",
+    "ruff>=0.14.14,<0.15.0",
+    "pytest-asyncio>=1.3.0,<2",
     "types-pyyaml>=6.0.12.20250915",
 ]
 
@@ -58,6 +58,7 @@ mark-parentheses = true
 
 [tool.ruff.lint.isort]
 order-by-type = false
+known-first-party = ["oddupiacz"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -75,11 +76,11 @@ ignore_unused = [
     "fawltydeps",
     "ipython",
     "mypy",
-    "pytest-asyncio",
     "pytest-cov",
     "pytest-mock",
     "pytest",
     "ruff",
+    "pytest-asyncio",
 ]
 
 [tool.mypy]
@@ -90,5 +91,6 @@ disable_error_code = "misc"
 
 [tool.pytest.ini_options]
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
-addopts = "--strict-markers -p no:warnings --cov=oddupiacz --cov-fail-under=90 --cov-config=.coveragerc"
+testpaths = "tests"
+addopts = "--strict-markers -p no:warnings --cov=oddupiacz --cov-fail-under=90"
 asyncio_mode = "auto"

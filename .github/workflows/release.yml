@@ -1,0 +1,41 @@
+name: "🚀 Release"
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["🧪 CI - linters and tests"]
+    types:
+      - completed
+    branches:
+      - main
+
+concurrency: # Run release builds sequentially
+  group: ci-${{ github.ref }}
+
+permissions: # Grant write access to github.token within non-pull_request builds
+  contents: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+    - name: "Check out code"
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - id: create-release
+      name: "Prepare release"
+      uses: mgoltzsche/conventional-release@v0
+
+    - name: "Show results"
+      run: |
+          if [ "${{ steps.create-release.outputs.publish }}" = "true" ]; then
+          echo "A release was created."
+          echo "Version: ${{ steps.create-release.outputs.version }}"
+          else
+          echo "No release was created."
+          fi

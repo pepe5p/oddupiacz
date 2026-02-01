@@ -1,6 +1,5 @@
 set dotenv-load
 
-PYTHONPATH := "./oddupiacz"
 PATHS_TO_LINT := "oddupiacz tests"
 TEST_PATH := "tests"
 ANSWERS_FILE := ".copier/.copier-answers.copier-python-project.yml"
@@ -65,20 +64,16 @@ alias full_lint_ff := lint_full_ff
 
 [group("lint")]
 [doc("Run mypy check (type checking)")]
-mypy: _set_pythonpath
+mypy:
 	uv run mypy {{PATHS_TO_LINT}} --show-error-codes --show-traceback --implicit-reexport
 
 [group("development")]
-[doc("Open python console (useful when prefixed with dc, as it opens python console inside docker)")]
-ps:
-	PYTHONPATH={{PYTHONPATH}} uv run ipython
+[doc("Run IPython with custom startup script")]
+ps startup_script="ipython_startup.py":
+	PYTHONSTARTUP={{ startup_script }} uv run ipython
 alias ipython := ps
-
-[doc("Helper command, sets PYTHONPATH")]
-_set_pythonpath path=PYTHONPATH:
-	PYTHONPATH={{path}}
 
 [group("development")]
 [doc("Run non-integration tests (optionally specify file=path/to/test_file.py)")]
-test file=TEST_PATH: _set_pythonpath
+test file=TEST_PATH:
 	uv run pytest {{file}} --durations=10

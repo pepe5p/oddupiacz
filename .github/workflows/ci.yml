@@ -1,4 +1,4 @@
-name: "CI - linters and tests"
+name: "🧪 CI - linters and tests"
 
 on:
   push:
