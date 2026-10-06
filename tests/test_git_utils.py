@@ -58,6 +58,22 @@ class TestFindLocalHookPath:
         assert result.name == "pre-commit"
 
     @patch("subprocess.check_output")
+    @patch("oddupiacz.git_utils.os.access")
+    @patch("pathlib.Path.exists")
+    def test_find_local_pre_push_hook(
+        self, mock_exists: MagicMock, mock_access: MagicMock, mock_check_output: MagicMock
+    ) -> None:
+        """Test finding a local pre-push hook by name."""
+        mock_check_output.return_value = "/home/user/repo/.git\n"
+        mock_exists.return_value = True
+        mock_access.return_value = True
+
+        result = find_local_hook_path(hook_name="pre-push")
+
+        assert result is not None
+        assert result.name == "pre-push"
+
+    @patch("subprocess.check_output")
     def test_find_local_hook_not_in_repo(self, mock_check_output: MagicMock) -> None:
         """Test behavior when not in a git repo."""
         from subprocess import CalledProcessError
@@ -102,6 +118,25 @@ class TestRunLocalHookIfExists:
         result = run_local_hook_if_exists(hook_path, [])
 
         assert result is False
+
+    @patch("subprocess.run")
+    def test_run_local_hook_replays_stdin(self, mock_run: MagicMock) -> None:
+        """Test that captured pre-push stdin is replayed to the local hook."""
+        mock_process = MagicMock()
+        mock_process.returncode = 0
+        mock_run.return_value = mock_process
+
+        hook_path = Path("/tmp/hooks/pre-push")  # noqa: S108
+        stdin_data = "refs/heads/feature abc refs/heads/main def\n"
+        result = run_local_hook_if_exists(
+            hook_path=hook_path,
+            args=["origin", "git@example.com:repo.git"],
+            stdin_data=stdin_data,
+        )
+
+        assert result is True
+        assert mock_run.call_args.kwargs["input"] == stdin_data
+        assert mock_run.call_args.kwargs["text"] is True
 
 
 class TestConfigureGitHooksPath:

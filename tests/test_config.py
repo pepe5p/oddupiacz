@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from oddupiacz.config import CannotLoadConfigError, Config, load_config
+from oddupiacz.config import CannotLoadConfigError, Config, load_config, load_mainblocker_config
 
 
 class TestLoadConfig:
@@ -135,3 +135,53 @@ class TestConfig:
         assert config.exclude_files == ["test.py"]
         assert config.exclude_extensions == [".log"]
         assert config.exclude_repos == ["oddupiacz"]
+
+
+class TestLoadMainblockerConfig:
+    """Tests for load_mainblocker_config function."""
+
+    def test_load_from_valid_config(self, tmp_path: Path) -> None:
+        """Test loading a valid mainblocker config."""
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text("""
+hooks_dir: /tmp/.githooks_global
+protected_branches:
+  - "main"
+exclude_repos:
+  - "oddupiacz"
+""")
+
+        config = load_mainblocker_config(config_path=config_file)
+
+        assert config.protected_branches == ["main"]
+        assert config.exclude_repos == ["oddupiacz"]
+
+    def test_missing_protected_branches_raises_error(self, tmp_path: Path) -> None:
+        """Test that a config without protected_branches raises error."""
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text("hooks_dir: /tmp/.githooks_global\n")
+
+        with pytest.raises(CannotLoadConfigError) as exc_info:
+            load_mainblocker_config(config_path=config_file)
+
+        assert "'protected_branches'" in str(exc_info.value)
+
+    def test_non_list_protected_branches_raises_error(self, tmp_path: Path) -> None:
+        """Test that a non-list protected_branches value raises error."""
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text("hooks_dir: /tmp/.githooks_global\nprotected_branches: main\n")
+
+        with pytest.raises(CannotLoadConfigError) as exc_info:
+            load_mainblocker_config(config_path=config_file)
+
+        assert "'protected_branches' must be a list" in str(exc_info.value)
+
+    def test_empty_protected_branches_raises_error(self, tmp_path: Path) -> None:
+        """Test that an empty protected_branches list raises error."""
+        config_file = tmp_path / "config.yaml"
+        config_file.write_text("hooks_dir: /tmp/.githooks_global\nprotected_branches: []\n")
+
+        with pytest.raises(CannotLoadConfigError) as exc_info:
+            load_mainblocker_config(config_path=config_file)
+
+        assert "'protected_branches' list cannot be empty" in str(exc_info.value)

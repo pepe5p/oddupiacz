@@ -49,12 +49,17 @@ def get_git_diff(cached: bool = True, unified: int = 0) -> str:
     return result.stdout
 
 
-def find_local_hook_path() -> Path | None:
+def find_local_hook_path(hook_name: str = "pre-commit") -> Path | None:
     """
-    Find the local pre-commit hook path for the current repository.
+    Find a local hook path for the current repository.
+
+    Args:
+        hook_name: Hook filename inside .git/hooks, such as pre-commit or pre-push
 
     Returns:
-        Path to local pre-commit hook if it exists and is executable, None otherwise
+        Path to the local hook if it exists and is executable, None otherwise.
+        Global core.hooksPath hides this directory from git, so the global hook
+        has to invoke it itself.
     """
     try:
         git_common_dir = subprocess.check_output(  # noqa: S603
@@ -65,7 +70,7 @@ def find_local_hook_path() -> Path | None:
     except subprocess.CalledProcessError:
         return None
 
-    local_hook_path = Path(git_common_dir) / "hooks" / "pre-commit"
+    local_hook_path = Path(git_common_dir) / "hooks" / hook_name
 
     if local_hook_path.exists() and os.access(local_hook_path, os.X_OK):
         return local_hook_path
@@ -73,13 +78,15 @@ def find_local_hook_path() -> Path | None:
     return None
 
 
-def run_local_hook_if_exists(hook_path: Path | None, args: list[str]) -> bool:
+def run_local_hook_if_exists(hook_path: Path | None, args: list[str], stdin_data: str | None = None) -> bool:
     """
-    Execute a local pre-commit hook if it exists.
+    Execute a local hook if it exists.
 
     Args:
         hook_path: Path to the hook script
         args: Additional arguments to pass to the hook
+        stdin_data: Text to replay on the hook's stdin. Needed for pre-push,
+            whose ref list was already consumed by the global hook.
 
     Returns:
         True if hook succeeded or doesn't exist, False if hook failed
@@ -87,7 +94,10 @@ def run_local_hook_if_exists(hook_path: Path | None, args: list[str]) -> bool:
     if hook_path is None:
         return True
 
-    result = subprocess.run([str(hook_path)] + args)  # noqa: S603
+    if stdin_data is not None:
+        result = subprocess.run([str(hook_path)] + args, input=stdin_data, text=True)  # noqa: S603
+    else:
+        result = subprocess.run([str(hook_path)] + args, text=True)  # noqa: S603
     return result.returncode == 0
 
 

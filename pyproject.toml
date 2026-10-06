@@ -65,7 +65,7 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError()",
 ]
-omit = ["oddupiacz/cli_hook.py", "oddupiacz/cli_setup.py"]
+omit = ["oddupiacz/cli_hook.py", "oddupiacz/cli_hook_push.py", "oddupiacz/cli_setup.py"]
 
 [tool.fawltydeps]
 code = ["oddupiacz"]

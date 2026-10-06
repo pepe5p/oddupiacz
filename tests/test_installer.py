@@ -3,14 +3,16 @@ Unit tests for installer.py module.
 """
 
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from oddupiacz.installer import (
     create_hook_directory,
     generate_shim_content,
     remove_hook_file,
+    uninstall_hook,
     write_executable_hook,
 )
-from oddupiacz.models import InstallationSettings
+from oddupiacz.models import HookKind, InstallationSettings
 
 
 class TestGenerateShimContent:
@@ -23,6 +25,7 @@ class TestGenerateShimContent:
             oddupiacz_path=Path("/path/to/oddupiacz"),
             config_path=Path("/path/to/config.yaml"),
             python_exec="/usr/bin/python3",
+            hook_kind=HookKind.PRE_COMMIT,
         )
 
         content = generate_shim_content(settings)
@@ -40,6 +43,7 @@ class TestGenerateShimContent:
             oddupiacz_path=Path("/path/to/oddupiacz"),
             config_path=Path("/path/to/config.yaml"),
             python_exec="/usr/bin/python3",
+            hook_kind=HookKind.PRE_COMMIT,
         )
 
         content = generate_shim_content(settings)
@@ -56,12 +60,30 @@ class TestGenerateShimContent:
             oddupiacz_path=Path("/path/to/oddupiacz"),
             config_path=Path("/path/to/config.yaml"),
             python_exec="/usr/bin/python3",
+            hook_kind=HookKind.PRE_COMMIT,
         )
         content = generate_shim_content(settings)
 
         assert "|" in content
         assert "git diff" in content
         assert content.index("git diff") < content.index("python3")
+
+    def test_generate_pre_push_shim_forwards_stdin(self) -> None:
+        """Test that the mainblocker shim does not consume stdin."""
+        settings = InstallationSettings(
+            hooks_dir=Path("/tmp/.githooks_global"),  # noqa: S108
+            oddupiacz_path=Path("/path/to/oddupiacz"),
+            config_path=Path("/path/to/config.yaml"),
+            python_exec="/usr/bin/python3",
+            hook_kind=HookKind.PRE_PUSH,
+        )
+
+        content = generate_shim_content(settings=settings)
+
+        assert "cli_hook_push" in content
+        assert "git diff" not in content
+        assert '"$@"' in content
+        assert "|" not in content
 
 
 class TestCreateHookDirectory:
@@ -152,3 +174,33 @@ class TestRemoveHookFile:
         removed = remove_hook_file(hook_path)
 
         assert removed is False
+
+
+class TestUninstallHook:
+    """Tests for uninstall_hook keeping core.hooksPath while another hook remains."""
+
+    @patch("oddupiacz.installer.unset_git_hooks_path")
+    def test_unsets_hooks_path_when_no_other_hook_remains(self, mock_unset: MagicMock, tmp_path: Path) -> None:
+        """Test that core.hooksPath is removed when the last hook goes away."""
+        hook_path = tmp_path / "pre-push"
+        hook_path.write_text("#!/bin/sh\n")
+        mock_unset.return_value = True
+
+        result = uninstall_hook(hook_path=hook_path)
+
+        assert result.hook_removed is True
+        assert result.config_unset is True
+        mock_unset.assert_called_once()
+
+    @patch("oddupiacz.installer.unset_git_hooks_path")
+    def test_keeps_hooks_path_when_another_hook_remains(self, mock_unset: MagicMock, tmp_path: Path) -> None:
+        """Test that core.hooksPath stays when the pre-commit hook is still installed."""
+        (tmp_path / "pre-commit").write_text("#!/bin/sh\n")
+        hook_path = tmp_path / "pre-push"
+        hook_path.write_text("#!/bin/sh\n")
+
+        result = uninstall_hook(hook_path=hook_path)
+
+        assert result.hook_removed is True
+        assert result.config_unset is False
+        mock_unset.assert_not_called()

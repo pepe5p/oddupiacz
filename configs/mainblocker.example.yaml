@@ -1,0 +1,19 @@
+# mainblocker configuration
+# Written by ./install-mainblocker to configs/mainblocker_config.yaml
+# Kept separate from the pre-commit config so the two installs do not overwrite each other.
+
+# REQUIRED: Directory git uses for global hooks (core.hooksPath).
+# Use the same directory as the pre-commit config. If they differ, only the
+# directory set by the most recent install is active.
+hooks_dir: "~/.githooks_global"
+
+# REQUIRED: Branches that require retyping the repository name before push.
+# Matching uses the remote ref, so pushing another local branch onto main is caught.
+protected_branches:
+  - "main"
+  - "master"
+
+# OPTIONAL: Repository directory names where mainblocker does not ask.
+# By default, oddupiacz itself is excluded.
+exclude_repos:
+  - "oddupiacz"

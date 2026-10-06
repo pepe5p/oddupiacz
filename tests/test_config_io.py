@@ -4,8 +4,9 @@ Unit tests for config_io.py module.
 
 from pathlib import Path
 
-from oddupiacz.config import Config
+from oddupiacz.config import Config, MainblockerConfig
 from oddupiacz.config_io import create_hook_path, save_config
+from oddupiacz.models import HookKind
 
 
 class TestSaveConfig:
@@ -48,6 +49,22 @@ class TestSaveConfig:
         assert config_path.exists()
         assert config_path.parent.exists()
 
+    def test_save_mainblocker_config(self, tmp_path: Path) -> None:
+        """Test that save_config writes a mainblocker config."""
+        config = MainblockerConfig(
+            hooks_dir=Path("/tmp/.githooks_global"),  # noqa: S108
+            protected_branches=["main", "master"],
+            exclude_repos=["oddupiacz"],
+        )
+
+        config_path = tmp_path / "mainblocker_config.yaml"
+        save_config(config=config, config_path=config_path)
+
+        content = config_path.read_text()
+        assert "main" in content
+        assert "master" in content
+        assert "protected_branches" in content
+
 
 class TestCreateHookPath:
     """Tests for create_hook_path function."""
@@ -59,3 +76,10 @@ class TestCreateHookPath:
 
         assert hook_path == hooks_dir / "pre-commit"
         assert hook_path.name == "pre-commit"
+
+    def test_create_pre_push_hook_path(self) -> None:
+        """Test that create_hook_path can point at the mainblocker hook."""
+        hooks_dir = Path("/tmp/.githooks_global")  # noqa: S108
+        hook_path = create_hook_path(hooks_dir=hooks_dir, hook_kind=HookKind.PRE_PUSH)
+
+        assert hook_path == hooks_dir / "pre-push"

@@ -4,7 +4,7 @@ Unit tests for models.py module.
 
 from pathlib import Path
 
-from oddupiacz.models import InstallationSettings, Violation
+from oddupiacz.models import HookKind, InstallationSettings, Violation
 
 
 class TestViolation:
@@ -29,12 +29,14 @@ class TestInstallationSettings:
             oddupiacz_path=Path("/path/to/oddupiacz"),
             config_path=Path("/path/to/config.yaml"),
             python_exec="/usr/bin/python3",
+            hook_kind=HookKind.PRE_COMMIT,
         )
 
         assert settings.hooks_dir == Path("/tmp/.githooks_global")  # noqa: S108
         assert settings.oddupiacz_path == Path("/path/to/oddupiacz")
         assert settings.config_path == Path("/path/to/config.yaml")
         assert settings.python_exec == "/usr/bin/python3"
+        assert settings.hook_kind is HookKind.PRE_COMMIT
 
     def test_create_exec_command(self) -> None:
         """Test generating execution command from settings."""
@@ -43,6 +45,7 @@ class TestInstallationSettings:
             oddupiacz_path=Path("/path/to/oddupiacz"),
             config_path=Path("/path/to/config.yaml"),
             python_exec="/usr/bin/python3",
+            hook_kind=HookKind.PRE_COMMIT,
         )
 
         command = settings.create_exec_command()
@@ -51,4 +54,19 @@ class TestInstallationSettings:
         assert "-m oddupiacz.cli_hook" in command
         assert "--config" in command
         assert str(settings.config_path) in command
+        assert "$@" in command
+
+    def test_create_exec_command_for_mainblocker(self) -> None:
+        """Test that a pre-push installation runs the mainblocker module."""
+        settings = InstallationSettings(
+            hooks_dir=Path("/tmp/.githooks_global"),  # noqa: S108
+            oddupiacz_path=Path("/path/to/oddupiacz"),
+            config_path=Path("/path/to/config.yaml"),
+            python_exec="/usr/bin/python3",
+            hook_kind=HookKind.PRE_PUSH,
+        )
+
+        command = settings.create_exec_command()
+
+        assert "-m oddupiacz.cli_hook_push" in command
         assert "$@" in command
